@@ -1,39 +1,32 @@
-# Prompt the user to input a network address
-network = input("Enter a network address in CIDR format(ex.192.168.1.0/24): ")
+import os
+import socket
+import csv
 
-# Create the network
-ip_net = ipaddress.ip_network(network)
 
-# Get all hosts on that network
-all_hosts = list(ip_net.hosts())
+iplist = []
 
-# Create output file in preset directory
-os.chdir("C:\\Python364\\Output")
-onlineHosts = "Online_Hosts.txt"
-offlineHosts = "Offline_Hosts.txt"
-on  = open(onlineHosts, 'a') # File object 'on' is created with append mode
-off = open(offlineHosts, 'a') # File object 'off' is created with append mode
+#loop from 1 to 255
+# Appends the concatenated ip to the ip_list
 
-# Configure subprocess to hide the console window
-info = subprocess.STARTUPINFO()
-info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-info.wShowWindow = subprocess.SW_HIDE
+for ip in range(1,5):
+    iplist.append("192.168.101." + str(ip))
 
-# For each IP address in the subnet, 
-# run the ping command with subprocess.popen interface
-for i in range(len(all_hosts)):
-    output = subprocess.Popen(['ping', '-n', '1', '-w', '500', str(all_hosts[i])], stdout=subprocess.PIPE, startupinfo=info).communicate()[0]
+#show me the list of ip address in the list
 
-    if "Destination host unreachable" in output.decode('utf-8'):
-        print(str(all_hosts[i]), "is Offline")
-        result = str(all_hosts[i])
-        off.write(result)
-
-    elif "Request timed out" in output.decode('utf-8'):
-        print(str(all_hosts[i]), "is Offline")
-        result = str(all_hosts[i])
-        off.write(result)
+print("*********ADBY IT AND MEDIA SOLUTIONS NETWORK SCAN*********")
+# Loop to ping ip_list and check if device up or down
+# Outputs to results.txt file
+print("Starting ping test")
+for ip in iplist:
+   
+    response = os.popen(f"ping  {ip} -n 1").read()
+    if "Received = 4"  and "Approximate" in response:
+        try:
+            hostname = socket.gethostbyaddr(ip)
+            print(" {}ONLINE".format( hostname))
+        except socket.error:
+            hostname = "No HOST NAME "
+            print(" {}{} ONLINE".format( hostname,ip))
+            print({hostname} +  "The System is online")
     else:
-        print(str(all_hosts[i]), "is Online")
-        result = str(all_hosts[i])
-        on.write(result
+        print(f"{ip} OFFLINE")
