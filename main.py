@@ -5,7 +5,7 @@ import datetime
 import logging
  
 def check_ping(hostname):
-    response = os.system("fping -r 10 -q " + hostname + " >/dev/null")
+    response = os.system("fping -r 5 -q " + hostname + " >/dev/null")
     if response == 0:
         check_ping = "[OK]"
     else:
@@ -19,9 +19,9 @@ with open('ip-source.txt') as file:
       
     for ip in dump:
          
-        os.system('cls')
+        #os.system('cls')
         print('Pinging now:', ip)
-        print('-'*10)
+        #print('-'*10)
         os.system('ping -n 2 {}'.format(ip))
-        print('-'*10)
+        #print('-'*10)
         #time.sleep(2)

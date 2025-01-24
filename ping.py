@@ -1,32 +1,29 @@
-import os
-import socket
-import csv
+import subprocess,os,threading,time
+from queue import Queue
+lock=threading.Lock()
+_start=time.time()
+def check(n):
+    with open(os.devnull, "wb") as limbo:
+                ip="192.168.101.{0}".format(n)
+                result=subprocess.Popen(["ping", "-n", "1", "-w", "100", ip],stdout=limbo, stderr=limbo).wait()
+                with lock:                    
+                    if not result:
+                        print (ip, " > Active" + " OK")   
+                    else:
+                        print (ip, " - Inactive" + " OFF")                    
+    
+def threader():
+    while True:
+        worker=q.get()
+        check(worker)
+        q.task_done()
+q=Queue()
 
-
-iplist = []
-
-#loop from 1 to 255
-# Appends the concatenated ip to the ip_list
-
-for ip in range(1,5):
-    iplist.append("192.168.101." + str(ip))
-
-#show me the list of ip address in the list
-
-print("*********ADBY IT AND MEDIA SOLUTIONS NETWORK SCAN*********")
-# Loop to ping ip_list and check if device up or down
-# Outputs to results.txt file
-print("Starting ping test")
-for ip in iplist:
-   
-    response = os.popen(f"ping  {ip} -n 1").read()
-    if "Received = 4"  and "Approximate" in response:
-        try:
-            hostname = socket.gethostbyaddr(ip)
-            print(" {}ONLINE".format( hostname))
-        except socket.error:
-            hostname = "No HOST NAME "
-            print(" {}{} ONLINE".format( hostname,ip))
-            print({hostname} +  "The System is online")
-    else:
-        print(f"{ip} OFFLINE")
+for x in range(50):
+    t=threading.Thread(target=threader)
+    t.daemon=True
+    t.start()
+for worker in range(1,50):
+    q.put(worker)
+q.join()
+print("Process completed in: ",time.time()-_start)
